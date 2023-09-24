@@ -1,0 +1,136 @@
+openapi: 3.0.3
+info:
+  title: FCI staff management api
+  description: An API for managing staff, offices, and allocated courses within the Faculty of Computing and Informatics.
+  version: 1.0.0
+servers:
+  - url: http://localhost:9090
+paths:
+  /lecturers:
+    get:
+      summary: Retrieves a list of all lecturers within the faculty.
+      responses:
+        "200":
+          description: Shows a list of lecturers.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lecturer"
+    post:
+      summary: Add a new lecturer.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Lecturer"
+      responses:
+        "201":
+          description: The lecturer was created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lecturer"
+  /lecturers/{staffNumber}:
+    get:
+      summary: Retrieve the details of a specific lecturer by their staff number.
+      parameters:
+        - name: staffNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: The lecturer details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lecturer"
+        "404":
+          description: The lecturer with the specified staff number does not exist.
+    put:
+      summary: Update an existing lecturer's information.
+      parameters:
+        - name: staffNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Lecturer"
+      responses:
+        "200":
+          description: The lecturer information was updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lecturer"
+        "404":
+          description: The lecturer with the specified staff number does not exist.
+    delete:
+      summary: Delete a lecturer's record by their staff number.
+      parameters:
+        - name: staffNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: The lecturer was deleted successfully.
+        "404":
+          description: The lecturer with the specified staff number does not exist.
+  /lecturers/courses/{courseCode}:
+    get:
+      summary: Retrieve all the lecturers that teach a certain course.
+      parameters:
+        - name: courseCode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A list of lecturers.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lecturer"
+        "404":
+          description: The course with the specified course code does not exist.
+  /lecturers/offices/{officeNumber}:
+    get:
+      summary: Retrieve all the lecturers that sit in the same office.
+      parameters:
+        - name: officeNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: A list of lecturers.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lecturer"
+        "404":
+          description: The office with the specified office number does not exist.
+components:
+  schemas:
+    Lecturer:
+      type: object
+      required:
+        - staffNumber
+        - officeNumber
+        - staffName
+        - AssignedCourses
