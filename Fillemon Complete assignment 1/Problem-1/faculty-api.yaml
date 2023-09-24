@@ -1,0 +1,144 @@
+openapi: 3.0.0
+info:
+  title: Faculty API
+  version: 1.0.0
+paths:
+  /lecturers:
+    get:
+      summary: Retrieve all lecturers
+      responses:
+        '200':
+          description: A list of lecturers
+          content:
+            application/json:
+              example:
+                - staffNumber: "001"
+                  officeNumber: "101"
+                  staffName: "John Doe"
+                  title: "Lecturer"
+                  courses:
+                    - courseName: "Computer Science 101"
+                      courseCode: "CS101"
+                      nqfLevel: 5
+                - staffNumber: "002"
+                  officeNumber: "102"
+                  staffName: "Jane Smith"
+                  title: "Senior Lecturer"
+                  courses:
+                    - courseName: "Database Management"
+                      courseCode: "DBM101"
+                      nqfLevel: 6
+    post:
+      summary: Add a new lecturer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Lecturer"
+      responses:
+        '201':
+          description: Lecturer added successfully
+
+  /lecturers/{staffNumber}:
+    get:
+      summary: Retrieve details of a lecturer by staff number
+      parameters:
+        - name: staffNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lecturer details
+          content:
+            application/json:
+              example:
+                staffNumber: "001"
+                officeNumber: "101"
+                staffName: "John Doe"
+                title: "Lecturer"
+                courses:
+                  - courseName: "Computer Science 101"
+                    courseCode: "CS101"
+                    nqfLevel: 5
+    put:
+      summary: Update lecturer information by staff number
+      parameters:
+        - name: staffNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Lecturer"
+      responses:
+        '204':
+          description: Lecturer information updated successfully
+    delete:
+      summary: Delete a lecturer by staff number
+      parameters:
+        - name: staffNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Lecturer deleted successfully
+
+  /courses/{courseCode}/lecturers:
+    get:
+      summary: Retrieve lecturers teaching a specific course
+      parameters:
+        - name: courseCode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lecturers teaching the course
+          content:
+            application/json:
+              example:
+                - staffNumber: "001"
+                  officeNumber: "101"
+                  staffName: "John Doe"
+                  title: "Lecturer"
+                  courses:
+                    - courseName: "Computer Science 101"
+                      courseCode: "CS101"
+                      nqfLevel: 5
+    # Add other paths as needed for your API
+components:
+  schemas:
+    Lecturer:
+      type: object
+      properties:
+        staffNumber:
+          type: string
+        officeNumber:
+          type: string
+        staffName:
+          type: string
+        title:
+          type: string
+        courses:
+          type: array
+          items:
+            $ref: "#/components/schemas/Course"
+    Course:
+      type: object
+      properties:
+        courseName:
+          type: string
+        courseCode:
+          type: string
+        nqfLevel:
+          type: integer

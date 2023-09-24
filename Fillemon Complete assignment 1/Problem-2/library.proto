@@ -1,0 +1,72 @@
+syntax = "proto3";
+import "google/protobuf/wrappers.proto";
+
+service LibraryService {
+    rpc add_book(AddBookRequest) returns (google.protobuf.StringValue);
+    rpc create_users(stream User) returns (google.protobuf.StringValue);
+    rpc update_book(UpdateBookRequest) returns (google.protobuf.StringValue);
+    rpc remove_book(RemoveBookRequest) returns (RemoveBookResponse);
+    rpc list_available_books(ListAvailableBooksRequest) returns (stream Book);
+    rpc locate_book(LocateBookRequest) returns (LocateBookResponse);
+    rpc borrow_book(BorrowBookRequest) returns (BorrowBookResponse);
+}
+
+message Book {
+    string title = 1;
+    string author_1 = 2;
+    string author_2 = 3;
+    string location = 4;
+    string ISBN = 5;
+    bool status = 6;
+}
+
+message User {
+    string userId = 1;
+    string profile = 2;
+}
+
+message AddBookRequest {
+    string title = 1;
+    string author_1 = 2;
+    string author_2 = 3;
+    string location = 4;
+    string ISBN = 5;
+    bool status = 6;
+}
+
+message RemoveBookRequest {
+    string ISBN = 1;
+}
+
+message RemoveBookResponse {
+    repeated Book updatedBooks = 1;
+}
+
+message UpdateBookRequest {
+    string ISBN = 1;
+    string title = 2;
+    string author_1 = 3;
+    string author_2 = 4;
+    string location = 5;
+    bool status = 6;
+}
+
+message ListAvailableBooksRequest {}
+
+message LocateBookRequest {
+    string ISBN = 1;
+}
+
+message LocateBookResponse {
+    string location = 1;
+    string message = 2;
+}
+
+message BorrowBookRequest {
+    string userId = 1;
+    string ISBN = 2;
+}
+
+message BorrowBookResponse {
+    string message = 1;
+}
