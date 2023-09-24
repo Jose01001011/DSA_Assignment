@@ -1,42 +1,42 @@
 import ballerina/grpc;
-import ballerina/math;
-
-// Define a string constant for service descriptor
-const string LIBRARY_DESC = "Library Service";
-
-// Define a list to store books globally
-type Book record {
-    string title;
-    string author_1;
-    string? author_2;
-    string location;
-    string ISBN;
-    boolean available;
-};
+import ballerina/io;
+import ballerina/random;
 
 Book[] books = [];
 
-type User record {
-    int userId;
-    string profile;
-};
+function generateISBN() returns string {
+    // Generate a unique ISBN using math:randRange
+    do {
+	    // Generate a unique ISBN using math:randRange
+	    int randomNum = check random:createIntInRange(1000, 9999);
+        return string ISBN-${randomNum};
+    } on fail var e {
+    	io:println(e.cause());
+    }
+}
 
-type BookList record {
-    Book[] books;
-};
-
+function filterAvailableBooks() returns Book[] {
+    Book[] availableBooks = [];
+    foreach Book book in books {
+        if book.status{
+            availableBooks.push(book);
+        }
+    }
+    return availableBooks;
+}
+    int nextUserId = 1;
+    User[] users = [];
 listener grpc:Listener ep = new (9090);
 
 @grpc:Descriptor {value: LIBRARY_DESC}
 service "LibraryService" on ep {
-    User[] users = [];
-    int nextUserId = 1;
+
 
     remote function addBook(Book value) returns string|error {
         // Generate a unique ISBN for the added book
         string ISBN = generateISBN();
-        value.ISBN = ISBN;
-        value.available = true;
+        value.isbn = ISBN;
+        value.status = true;
 
         // Add the incoming book to the list of books
         books.push(value);
@@ -45,39 +45,45 @@ service "LibraryService" on ep {
 
     remote function createUsers(stream<User, grpc:Error?> clientStream) returns string|error {
         while (true) {
-            var user, err = clientStream.next();
-            if (err is grpc:EOS) {
+            record {|User value;|}|grpc:Error? user = clientStream.next();
+            if (user is grpc:Error) {
                 break;
-            } else if (err != null) {
-                return err;
-            } else if (user is User) {
+            } else {
+                return "users created successfully";
                 // Assign a unique user ID and add the user to the list
-                user.userId = nextUserId;
-                nextUserId++;
-                users.push(user);
-            }
+                // user = nextUserId;
+                // nextUserId+=1;
+                // users.push(user);
+            } 
+
         }
         return "Users created successfully";
     }
 
     remote function updateBook(Book value) returns Book|error {
         // Find the book by ISBN and update its information
-        for (int i = 0; i < books.length(); i++) {
-            if (books[i].ISBN == value.ISBN) {
+        int i = 0;
+        while i < books.length() {
+            if (books[i].isbn == value.isbn) {
                 books[i] = value; // Update the book
                 return value;
             }
+
+            i += 1;
         }
         return error("Book not found");
     }
 
     remote function removeBook(string ISBN) returns BookList|error {
         // Remove the book with the specified ISBN from the list
-        for (int i = 0; i < books.length(); i++) {
-            if (books[i].ISBN == ISBN) {
-                books.remove(i);
+        int i =0;
+        while i < books.length() {
+            if (books[i].isbn == ISBN) {
+                _ = books.remove(i);
                 return { books: books }; // Return the updated list of books
             }
+
+            i += 1;
         }
         return error("Book not found");
     }
@@ -89,9 +95,9 @@ service "LibraryService" on ep {
 
     remote function locateBook(string ISBN) returns string|error {
         // Search for the book by ISBN
-        for (Book book in books) {
-            if (book.ISBN == ISBN) {
-                if (book.available) {
+        foreach Book book in books {
+            if (book.isbn == ISBN) {
+                if (book.status) {
                     return "Location: " + book.location;
                 } else {
                     return "Book is not available";
@@ -101,11 +107,12 @@ service "LibraryService" on ep {
         return error("Book not found");
     }
 
-    remote function borrowBook(User user, string ISBN) returns string|error {
+    remote function borrowBook(BorrowRequest value) returns string|error {
         // Check if the user exists
         boolean userExists = false;
-        for (User u in users) {
-            if (u.userId == user.userId) {
+
+        foreach User u in users {
+            if (u.user_id == value.user_id) {
                 userExists = true;
                 break;
             }
@@ -116,32 +123,21 @@ service "LibraryService" on ep {
         }
 
         // Search for the book by ISBN
-        for (int i = 0; i < books.length(); i++) {
-            if (books[i].ISBN == ISBN) {
-                if (books[i].available) {
-                    books[i].available = false;
+        int i = 0;
+        while i < books.length() {
+            if (books[i].isbn == value.isbn) {
+                if (books[i].status) {
+                    books[i].status = false;
                     return "Book borrowed successfully";
                 } else {
                     return "Book is already borrowed";
                 }
             }
+
+            i += 1;
         }
         return error("Book not found");
     }
 
-    function generateISBN() returns string {
-        // Generate a unique ISBN using math:randRange
-        int randomNum = math:randRange(1000, 9999);
-        return "ISBN-" + string(randomNum);
-    }
-
-    function filterAvailableBooks() returns Book[] {
-        Book[] availableBooks = [];
-        for (Book book in books) {
-            if (book.available) {
-                availableBooks.push(book);
-            }
-        }
-        return availableBooks;
-    }
+    
 }
