@@ -1,0 +1,244 @@
+Define the OpenAPI Specification:
+
+openapi: 3.0.0
+info:
+  title: Faculty API
+  version: 1.0.0
+paths:
+  /lecturers:
+    get:
+      summary: Retrieve a list of all lecturers
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Lecturer'
+    post:
+      summary: Add a new lecturer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Lecturer'
+      responses:
+        201:
+          description: Lecturer added successfully
+  /lecturers/{staffNumber}:
+    get:
+      summary: Retrieve details of a specific lecturer
+      parameters:
+        - name: staffNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lecturer'
+    put:
+      summary: Update an existing lecturer's information
+      parameters:
+        - name: staffNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Lecturer'
+      responses:
+        200:
+          description: Lecturer updated successfully
+    delete:
+      summary: Delete a lecturer's record
+      parameters:
+        - name: staffNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        204:
+          description: Lecturer deleted successfully
+components:
+  schemas:
+    Lecturer:
+      type: object
+      properties:
+        staffNumber:
+          type: integer
+        officeNumber:
+          type: integer
+        staffName:
+          type: string
+        title:
+          type: string
+        courses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Course'
+    Course:
+      type: object
+      properties:
+        courseName:
+          type: string
+        courseCode:
+          type: string
+        nqfLevel:
+          type: integer
+Implement the Ballerina Client: by using the'http' package to create a client that interacts with the OpenAPI specification.
+
+import ballerina/http;
+
+endpoint http:Client facultyApi {
+    url: "http://api.example.com/faculty"
+};
+
+function getLecturers() returns json {
+    http:Response response = facultyApi->get("/lecturers");
+    if (response is http:Response) {
+        if (response.statusCode == 200) {
+            return response.getJsonPayload();
+        }
+    }
+    return ();
+}
+
+// Implement other client functions for adding, updating, and deleting lecturers.
+
+Implement the Ballerina Service:that listens for incoming requests and handles the logic based on the OpenAPI specification.
+
+import ballerina/http;
+
+service /faculty on new http:Listener(8080) {
+    resource function get lecturers() returns json {
+        // Implement logic to retrieve a list of lecturers.
+    }
+    
+    resource function post lecturers(json lecturer) returns json {
+        // Implement logic to add a new lecturer.
+    }
+
+    // Implement other resource functions for updating, deleting, and retrieving specific lecturers.
+}
+
+implementing a RESTful API to manage staff, offices, and courses in the Faculty of Computing and Informatics:
+
+import ballerina/http;
+
+// Define the structure for a lecturer.
+type Lecturer record {
+    int staffNumber;
+    int officeNumber;
+    string staffName;
+    string title;
+    Course[] courses;
+};
+
+// Define the structure for a course.
+type Course record {
+    string courseName;
+    string courseCode;
+    int nqfLevel;
+};
+
+// In-memory data store for lecturers.
+map<int, Lecturer> lecturers = {};
+
+// Create a Ballerina HTTP service.
+service /faculty on new http:Listener(8080) {
+
+    // Endpoint to add a new lecturer.
+    @http:ResourceConfig {
+        methods: ["POST"],
+        path: "/lecturers"
+    }
+    resource function addLecturer(Lecturer lecturer) returns json {
+        lecturers[lecturer.staffNumber] = lecturer;
+        return { "message": "Lecturer added successfully" };
+    }
+
+    // Endpoint to retrieve a list of all lecturers.
+    @http:ResourceConfig {
+        methods: ["GET"],
+        path: "/lecturers"
+    }
+    resource function getAllLecturers() returns json {
+        Lecturer[] lecturerList = lecturers.values();
+        return lecturerList;
+    }
+
+    // Endpoint to retrieve details of a specific lecturer by staff number.
+    @http:ResourceConfig {
+        methods: ["GET"],
+        path: "/lecturers/{staffNumber}"
+    }
+    resource function getLecturerByStaffNumber(int staffNumber) returns json {
+        Lecturer? lecturer = lecturers[staffNumber];
+        if (lecturer != null) {
+            return lecturer;
+        } else {
+            // Return an error message if the lecturer is not found.
+            return { "error": "Lecturer not found" };
+        }
+    }
+
+    // Endpoint to update an existing lecturer's information by staff number.
+    @http:ResourceConfig {
+        methods: ["PUT"],
+        path: "/lecturers/{staffNumber}"
+    }
+    resource function updateLecturerByStaffNumber(int staffNumber, Lecturer lecturer) returns json {
+        if (lecturers[staffNumber] != null) {
+            lecturers[staffNumber] = lecturer;
+            return { "message": "Lecturer updated successfully" };
+        } else {
+            // Return an error message if the lecturer is not found.
+            return { "error": "Lecturer not found" };
+        }
+    }
+
+    // Endpoint to delete a lecturer's record by staff number.
+    @http:ResourceConfig {
+        methods: ["DELETE"],
+        path: "/lecturers/{staffNumber}"
+    }
+    resource function deleteLecturerByStaffNumber(int staffNumber) returns json {
+        if (lecturers[staffNumber] != null) {
+            lecturers.remove(staffNumber);
+            return { "message": "Lecturer deleted successfully" };
+        } else {
+            // Return an error message if the lecturer is not found.
+            return { "error": "Lecturer not found" };
+        }
+    }
+}
+
+public function main() {
+    http:Listener listener = new http:Listener(8080);
+    http:Server server = new http:Server({listener});
+
+    // Start the HTTP server.
+    error? startResult = server.start();
+    if (startResult is error) {
+        log:printError("Error starting the server: ", startResult);
+    } else {
+        log:print("Server started successfully");
+    }
+}
+
+
+
+
+
+

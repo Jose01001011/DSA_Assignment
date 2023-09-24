@@ -1,0 +1,141 @@
+First, define the gRPC service and protocol buffer contract (book_service.proto):
+
+syntax = "proto3";
+
+package library;
+
+service LibraryService {
+    rpc addBook (Book) returns (Book);
+    rpc createUsers (stream User) returns (UserResponse);
+    rpc updateBook (Book) returns (Book);
+    rpc removeBook (Book) returns (BookList);
+    rpc listAvailableBooks (Empty) returns (BookList);
+    rpc locateBook (LocateRequest) returns (LocationResponse);
+    rpc borrowBook (BorrowRequest) returns (BorrowResponse);
+}
+
+message Book {
+    string title = 1;
+    string author_1 = 2;
+    string author_2 = 3;
+    string location = 4;
+    string isbn = 5;
+    bool status = 6;
+}
+
+message User {
+    string user_id = 1;
+    string user_profile = 2;
+}
+
+message UserResponse {
+    string response = 1;
+}
+
+message BookList {
+    repeated Book books = 1;
+}
+
+message Empty {}
+
+message LocateRequest {
+    string isbn = 1;
+}
+
+message LocationResponse {
+    string location = 1;
+}
+
+message BorrowRequest {
+    string user_id = 1;
+    string isbn = 2;
+}
+
+message BorrowResponse {
+    string response = 1;
+}
+
+Next, create a Ballerina server (library_server.bal) that implements the gRPC service:
+
+import ballerina/grpc;
+import ballerina/log;
+
+service library:LibraryService {
+    endpoint grpc:Listener listener {
+        port: 9090
+    }
+
+    // Implement gRPC service methods here.
+    remote function addBook(library:Book book) returns (library:Book) {
+        // Implement logic to add a book and return the added book with ISBN.
+    }
+
+    remote function createUsers(stream<library:User> users) returns (library:UserResponse) {
+        // Implement logic to create users and return a response.
+    }
+
+    remote function updateBook(library:Book book) returns (library:Book) {
+        // Implement logic to update a book and return the updated book.
+    }
+
+    remote function removeBook(library:Book book) returns (library:BookList) {
+        // Implement logic to remove a book and return the updated book list.
+    }
+
+    remote function listAvailableBooks(library:Empty) returns (library:BookList) {
+        // Implement logic to list available books and return the book list.
+    }
+
+    remote function locateBook(library:LocateRequest request) returns (library:LocationResponse) {
+        // Implement logic to locate a book and return its location.
+    }
+
+    remote function borrowBook(library:BorrowRequest request) returns (library:BorrowResponse) {
+        // Implement logic to handle book borrowing and return a response.
+    }
+}
+
+public function main() {
+    log:print("gRPC library server started.");
+    grpc:Server server = new({
+        service: library:LibraryService,
+        listener: listener
+    });
+    _ = server.start();
+    check grpc:waitForShutdown(server);
+}
+
+Now, create a Ballerina client (library_client.bal) to interact with the server:
+
+import ballerina/grpc;
+import ballerina/log;
+
+function main(string... args) {
+    grpc:ClientConfiguration clientConfig = {
+        target: "localhost:9090"
+    };
+
+    library:LibraryServiceClient libraryClient = new(clientConfig);
+
+    // Implement client logic for each gRPC method.
+    // Example: addBook
+    library:Book book = {
+        title: "Sample Book",
+        author_1: "Author A",
+        location: "Shelf 1",
+        isbn: "1234567890",
+        status: true
+    };
+    
+    var response = libraryClient->addBook(book);
+
+    if (response is library:Book) {
+        log:print("Book added successfully. ISBN: ", response.isbn);
+    } else {
+        // Handle the error.
+        log:printError("Error adding the book: ", response);
+    }
+}
+
+
+
