@@ -1,0 +1,194 @@
+openapi: 3.0.0
+info:
+  title: Faculty API
+  version: 1.0.0
+paths:
+  /lecturers:
+    #Get http request
+    get:
+      summary: Retrieve all lecturers
+      responses:
+        "200":
+          description: A list of lecturers
+          content:
+            application/json:
+              example:
+                #1st Lecturer
+                - staffNumber: "001"
+                  officeNumber: "101"
+                  staffName: "Max Haikali"
+                  title: "Junior Lecturer"
+                  courses:
+                    - courseName: "Data Science"
+                      courseCode: "DS101"
+                      nqfLevel: 6
+                    - courseName: "Web Developmenent"
+                      courseCode: "WD102"
+                      nqfLevel: 7
+
+                      #2nd Lecturer
+                - staffNumber: "002"
+                  officeNumber: "102"
+                  staffName: "Fillemon-Mekki"
+                  title: "Senior Lecturer"
+                  courses:
+                    - courseName: "Machine Learning"
+                      courseCode: "ML103"
+                      nqfLevel: 6
+                    - courseName: "Artificial Intelligence"
+                      courseCode: "AI104"
+                      nqfLevel: 7
+
+                      #3rd Lecturer
+                - staffNumber: "003"
+                  officeNumber: "102"
+                  staffName: "Jose Clayton"
+                  title: "Senior Lecturer"
+                  courses:
+                    - courseName: "Distributed Systems"
+                      courseCode: "DSA105"
+                      nqfLevel:
+                        6
+
+                        #4th Lecturer
+                - staffNumber: "004"
+                  officeNumber: "102"
+                  staffName: "Gift Liswaniso"
+                  title: "Junior Lecturer"
+                  courses:
+                    - courseName: "Database Management"
+                      courseCode: "DBM106"
+                      nqfLevel:
+                        6
+
+                        #5th Lecture
+                - staffNumber: "005"
+                  officeNumber: "102"
+                  staffName: "Shaun Khariseb"
+                  title: "Senior Lecturer"
+                  courses:
+                    - courseName: "Data Structures & Algorithms"
+                      courseCode: "DSA107"
+                      nqfLevel: 6
+
+                      #Post http request
+    post:
+      summary: Add a new lecturer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Lecturer"
+      responses:
+        "201":
+          description: Lecturer added successfully!
+
+  /lecturers/{staffNumber}:
+    get:
+      summary: Retrieve details of a lecturer by staff number
+      parameters:
+        - name: staffNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lecturer details
+          content:
+            application/json:
+              example:
+                staffNumber: "001"
+                officeNumber: "101"
+                staffName: "Max Haikali"
+                title: "Junior Lecturer"
+                courses:
+                  - courseName: "Web Developmenent"
+                    courseCode: "WD102"
+                    nqfLevel: 7
+
+                    #PUT http request
+    put:
+      summary: Update lecturer information by staff number
+      parameters:
+        - name: staffNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Lecturer"
+      responses:
+        "204":
+          description: Lecturer information updated successfully
+
+          #DELETE http request
+    delete:
+      summary: Delete a lecturer by staff number
+      parameters:
+        - name: staffNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Lecturer deleted successfully
+
+          #Get http request 2 -> with Course code outputs lectures
+
+  /courses/{courseCode}/lecturers:
+    get:
+      summary: Retrieve lecturers teaching a specific course
+      parameters:
+        - name: courseCode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lecturers teaching the course
+          content:
+            application/json:
+              example:
+                - staffNumber: "001"
+                  officeNumber: "101"
+                  staffName: "Max Haikali"
+                  title: "Junior Lecturer"
+                  courses:
+                    - courseName: "Computer Science 101"
+                      courseCode: "DS101"
+                      nqfLevel: 6
+    # Add other paths as needed for your API
+components:
+  schemas:
+    Lecturer:
+      type: object
+      properties:
+        staffNumber:
+          type: string
+        officeNumber:
+          type: string
+        staffName:
+          type: string
+        title:
+          type: string
+        courses:
+          type: array
+          items:
+            $ref: "#/components/schemas/Course"
+    Course:
+      type: object
+      properties:
+        courseName:
+          type: string
+        courseCode:
+          type: string
+        nqfLevel:
+          type: integer
