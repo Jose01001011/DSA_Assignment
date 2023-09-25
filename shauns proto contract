@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package library;
+package libraries;
 
 service LibraryService {
     rpc addBook (Book) returns (Book);
