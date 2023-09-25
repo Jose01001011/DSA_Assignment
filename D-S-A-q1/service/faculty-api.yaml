@@ -1,0 +1,427 @@
+openapi: 3.0.0
+info:
+  title: faculty API
+  version: 1.0.0
+  description: Manage Staff, Staff Offices and Staff Office Allocations
+
+servers:
+  - url: http://localhost:9000/faculty-api/v1
+
+paths:
+  /lecturers:
+    post:
+      summary: Add a new lecturer
+      operationId: addLecturer
+      description: Add a new lecturer to the collection of lecturers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Lecturer'
+      responses:
+        '201':
+          description: Lecturer added successfully
+          content:
+            application/json:
+              schema:
+                properties:
+                  lecturerid:
+                    type: integer
+                    description: the lecturer number of the newly created lecturer
+        default:
+          $ref: '#/components/schemas/ErrorMessage'
+    get:
+      summary: Fetch all lecturers
+      operationId: getAllLecturers
+      description: Get a list of all the lecturers
+      responses:
+        '200':
+          description: All lecturers Retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Lecturer'
+        default:
+          $ref: '#/components/responses/ErrorMessage'
+
+  /lecturers/{staff_number}:
+    parameters:
+      - in: path
+        name: staff_number
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Retrieve A Single Lecturer
+      operationId: retrieveLecturer
+      description: Find a single lecturer by their staff number
+      responses:
+        '200':
+          description: Lecturer Retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lecturer'
+        default:
+          $ref: '#/components/responses/ErrorMessage'
+    put:
+      summary: Update A Single Lecturer
+      operationId: updateLecturer
+      description: Update the details of a single lecturer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Lecturer'
+      responses:
+        '200':
+          description: Lecturer Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lecturer'
+        default:
+          $ref: '#/components/responses/ErrorMessage'
+    delete:
+      summary: Delete A Single Lecturer
+      operationId: deleteLecturer
+      description: Delete a single lecturer by their staff number
+      responses:
+        '200':
+          description: Lecturer Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lecturer'
+        default:
+          $ref: '#/components/responses/ErrorMessage'
+  /courses:
+    post:
+      summary: Add a new course
+      operationId: addCourse
+      description: Add a new course to the collection of courses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Course'
+      responses:
+        '201':
+          description: Course added successfully
+          content:
+            application/json:
+              schema:
+                properties:
+                  courseid:
+                    type: integer
+                    description: the course number of the newly created course
+        default:
+          $ref: '#/components/schemas/ErrorMessage'
+    get:
+      summary: Fetch all courses
+      operationId: getAllCourses
+      description: Get a list of all the courses
+      responses:
+        '200':
+          description: All courses Retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
+        default:
+          $ref: '#/components/responses/ErrorMessage'
+  /courses/{course_code}:
+    parameters:
+      - in: path
+        name: course_code
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Retrieve A Single Course
+      operationId: retrieveCourse
+      description: Find a single course by its course code
+      responses:
+        '200':
+          description: Course Retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        default:
+          $ref: '#/components/responses/ErrorMessage'
+    put:
+      summary: Update A Single Course
+      operationId: updateCourse
+      description: Update the details of a single course
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Course'
+      responses:
+        '200':
+          description: Course Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        default:
+          $ref: '#/components/responses/ErrorMessage'
+    delete:
+      summary: Delete A Single Course
+      operationId: deleteCourse
+      description: Delete a single course by its course code
+      responses:
+        '200':
+          description: Course Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        default:
+          $ref: '#/components/responses/ErrorMessage'
+  /courses/{course_code}/lecturers:
+    parameters:
+      - in: path
+        name: course_code
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Retrieve All Lecturers Teaching A Course
+      operationId: retrieveLecturersTeachingCourse
+      description: Find all lecturers teaching a course by its course code
+      responses:
+        '200':
+          description: Lecturers Retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Lecturer'
+        default:
+          $ref: '#/components/responses/ErrorMessage'
+    post: 
+      summary: Assign a lecturers to a course
+      operationId: assignLecturerToCourse
+      description: Assign a lecturer to a specified course
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Lecturer'
+      responses:
+        '200': 
+          description: Lecturer Assigned
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lecturer'
+        default:
+          $ref: '#components/responses/ErrorMessage'
+  /offices:
+    post:
+      summary: Add a new office
+      operationId: addOffice
+      description: Add a new office to the collection of offices
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Office'
+      responses:
+        '201':
+          description: Office added successfully
+          content:
+            application/json:
+              schema:
+                properties:
+                  officeid:
+                    type: integer
+                    description: the office number of the newly created office
+        default:
+          $ref: '#/components/schemas/ErrorMessage'
+    get:
+      summary: Fetch all offices
+      operationId: getAllOffices
+      description: Get a list of all the offices
+      responses:
+        '200':
+          description: All offices Retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Office'
+        default:
+          $ref: '#/components/responses/ErrorMessage'
+  /offices/{office_number}:
+    parameters:
+      - in: path
+        name: office_number
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Retrieve A Single Office
+      operationId: retrieveOffice
+      description: Find a single office by its office number
+      responses:
+        '200':
+          description: Office Retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Office'
+        default:
+          $ref: '#/components/responses/ErrorMessage'
+    put:
+      summary: Update A Single Office
+      operationId: updateOffice
+      description: Update the details of a single office
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Office'
+      responses:
+        '200':
+          description: Office Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Office'
+        default:
+          $ref: '#/components/responses/ErrorMessage'
+    delete:
+      summary: Delete A Single Office
+      operationId: deleteOffice
+      description: Delete a single office by its office number
+      responses:
+        '200':
+          description: Office Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Office'
+        default:
+          $ref: '#/components/responses/ErrorMessage'
+  /offices/{office_number}/lecturers:
+    parameters:
+      - in: path
+        name: office_number
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Retrieve lecturers in an office
+      operationId: retrieveLecturersInOffice
+      description: Find all lecturers in an office by its office number
+      responses:
+        '200':
+          description: Lecturers Retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Lecturer'
+        default:
+          $ref: '#/components/responses/ErrorMessage'
+
+components:
+  schemas:
+    Lecturer:
+      type: object
+      required:
+        - staff_number
+      properties:
+        staff_number:
+          type: integer
+          description: The staff number of the lecturer
+        name:
+          type: string
+          description: The name of the lecturer
+        title:
+          type: string
+          description: The title of the lecturer
+        email:
+          type: string
+          description: The email of the lecturer
+        phone_number:
+          type: string
+          description: The phone number of the lecturer
+        office_number:
+          type: object
+          description: The office number of the lecturer
+          $ref: '#/components/schemas/Office'
+        courses:
+          type: array
+          description: The courses the lecturer teaches
+          items:
+            type: object
+            description: The course code of the course
+            $ref: '#/components/schemas/Course'
+    Course:
+      type: object
+      required:
+        - course_code
+      properties:
+        course_code:
+          type: string
+          description: The course code of the course
+        name:
+          type: string
+          description: The name of the course
+        nqf:
+          type: integar
+          description: The NQF level of the course
+    Office:
+      type: object
+      required:
+        - office_number
+      properties:
+        office_number:
+          type: integer
+          description: The office number of the office
+        building:
+          type: string
+          description: The building the office is in
+        floor:
+          type: integer
+          description: The floor the office is on
+        room:
+          type: string
+          description: The room number of the office
+    
+    Error:
+      type: object
+      properties:
+        errorType:
+          type: string
+          description: The type of error
+          enum:
+            - BadRequest
+
+            - Not Found
+
+            - InternalServerError
+        message:
+          type: string
+          description: The error message
+
+  responses:
+    ErrorMessage:
+      description: Exception handling of lecturers, courses and offices
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+

@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
+
+package library;
+
+/// Service
+
+service LibrarySystem {
+    // admin actions
+    rpc create_users (stream UserRequest) returns (google.protobuf.StringValue);
+
+    // librarian actions
+    rpc add_book (book) returns (google.protobuf.StringValue);
+    rpc update_book (book) returns (google.protobuf.StringValue);
+    rpc remove_book (google.protobuf.StringValue) returns (stream book);
+    rpc get_borrowed_book (google.protobuf.Empty) returns (stream book);
+
+    // student actions
+    rpc list_available_book (google.protobuf.Empty) returns (stream book);
+    rpc borrow_book (StudentRequest) returns (google.protobuf.StringValue);
+    rpc return_book (StudentRequest) returns (google.protobuf.StringValue);
+    rpc locate_book (google.protobuf.StringValue) returns (location);
+
+}
+
+// Requests
+// used when creating users
+message UserRequest {
+    student student = 1;
+    librarian librarian = 2;
+}
+
+// used when a student wants to borrow or return a book
+message StudentRequest{
+    string student_number = 1;
+    string ISBN = 2;
+}
+
+
+// Models
+
+message student {
+    string student_number = 1;
+    string first_name = 2;
+    string last_name = 3;
+}
+
+message librarian {
+    string staff_id = 1;
+    string first_name = 2;
+    string last_name = 3;
+}
+
+message admin {
+    string staff_id = 1;
+    string first_name = 2;
+    string last_name = 3;
+}
+
+message book {
+    string ISBN = 1;
+    string name = 2;
+    repeated author authors = 3;
+    string publisher = 4;
+    string genre = 5;
+    int32 year_published = 6;
+    int32 edition = 7;
+    book_status status = 8;
+    location book_location = 9;
+}
+
+enum book_status{
+    AVAILABLE = 0;
+    UNAVAILABLE = 1;
+}
+
+message author{
+    string first_name = 1;
+    string middle_name = 2;
+    string last_name = 3;
+}
+
+message borrowed_book{
+    string id = 1;
+    string student_number = 2;
+    string ISBN = 3;
+}
+
+message location {
+    string section = 1;
+    int32 aisle = 2;
+    int32 floor = 3;
+}
