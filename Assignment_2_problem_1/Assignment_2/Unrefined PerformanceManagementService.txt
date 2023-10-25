@@ -15,15 +15,7 @@ configurable string collection = ?;
 configurable string usersCollection = ?;
 configurable string kpisCollection = ?;
 configurable string objectivesCollection = ?;
-configurable string host = ?;
-configurable int port = ?;
-configurable string username = ?;
-configurable string password = ?;
-configurable string database = ?;
-configurable string collection = ?;
-configurable string usersCollection = ?;
-configurable string kpisCollection = ?;
-configurable string objectivesCollection = ?;
+
 
 
 mongodb:ConnectionConfig mongoConfig = {
