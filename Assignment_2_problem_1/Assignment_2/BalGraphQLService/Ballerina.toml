@@ -1,8 +1,0 @@
-[package]
-org = "janua"
-name = "BalGraphQLService"
-version = "0.1.0"
-distribution = "2201.7.0"
-
-[build-options]
-observabilityIncluded = true
