@@ -1,0 +1,23 @@
+host = "localhost"
+port = 27017
+username = "216013216"
+password = "Assignment2!StrongPassword!"
+database = "Assignment2Problem1"
+usersCollection = "Users"
+kpisCollection = "KPIs"
+objectivesCollection = "DepartmentObjectives"
+
+[[auth.users]]
+username = "admin"
+password = "admin123"
+scopes = ["HoD"]
+
+[[auth.users]]
+username = "supervisor"
+password = "sup123"
+scopes = ["Supervisor"]
+
+[[auth.users]]
+username = "employee"
+password = "emp123"
+scopes = ["Employee"]
