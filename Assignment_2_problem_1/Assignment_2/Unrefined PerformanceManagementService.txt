@@ -1,0 +1,346 @@
+//import ballerina/http;
+import ballerina/graphql;
+//import ballerina/log;
+//import ballerina/mime;
+
+// Import the MongoDB module for database operations
+import ballerinax/mongodb;
+
+configurable string host = ?;
+configurable int port = ?;
+configurable string username = ?;
+configurable string password = ?;
+configurable string database = ?;
+configurable string collection = ?;
+configurable string usersCollection = ?;
+configurable string kpisCollection = ?;
+configurable string objectivesCollection = ?;
+
+mongodb:ConnectionConfig mongoConfig = {
+    connection: {
+        host: host,
+        port: port,
+        auth: {
+            username: username,
+            password: password
+        },
+        options: {
+            sslEnabled: false, 
+            serverSelectionTimeout: 5000
+        }
+    },
+    databaseName: "Assignment2Attempt"
+};
+
+mongodb:Client mongoClient = check new (mongoConfig);
+
+public type User record {
+    string id;
+    string firstName;
+    string lastName;
+    string jobTitle;
+    string position;
+    string role;
+    int departmentID;
+};
+
+public type DepartmentObjective record {
+    string id;
+    string objectiveName;
+    string description;
+    int contributionPercentage;
+    int departmentID;
+};
+
+public type KPI record {
+    string id;
+    int employeeID;
+    int objectiveID;
+    string kpiName;
+    string description;
+    string unit;
+    float score;
+    int supervisorID;
+};
+
+service /graphql on new graphql:Listener(4000) {
+    // Resolver for the 'getUser' query. This function fetches a user by their ID.
+resource function get getUser(string id) returns User|error {
+    // Creating a filter to match the user by their ID.
+    map<json> filter = {"id": id};
+
+    // Using the 'find' function of the mongoClient to fetch the user based on the provided ID.
+    var result = mongoClient->find("usersCollection", "Assignment2Attempt", filter, (), (), -1, -1, User);
+
+    // Checking the type of the result. If it's a stream, it means documents were found matching the filter.
+    if (result is stream<User, error?>) {
+        var userResult = result.next();
+
+        // Checking if the result contains a User record.
+        if (userResult is record {| User value; |}) {
+            return userResult.value;  // Return the matched user.
+        } else if (userResult is error) {
+            return userResult;  // Return the error if any occurred.
+        } else {
+            return error("User not found");  // If no user was found, return an error.
+        }
+    } else if (result is error) {
+        return result;  // Return the error if the find operation failed.
+    }
+}
+
+// Resolver for the 'getDepartmentObjective' query. This function fetches a department objective by its ID.
+resource function get getDepartmentObjective(string id) returns DepartmentObjective|error {
+    // Creating a filter to match the department objective by its ID.
+    map<json> filter = {"id": id};
+
+    // Using the 'find' function of the mongoClient to fetch the department objective based on the provided ID.
+    var result = mongoClient->find("objectivesCollection", "Assignment2Attempt", filter, (), (), -1, -1, DepartmentObjective);
+
+    // Checking the type of the result. If it's a stream, it means documents were found matching the filter.
+    if (result is stream<DepartmentObjective, error?>) {
+        var deptObjectiveResult = result.next();
+
+        // Checking if the result contains a DepartmentObjective record.
+        if (deptObjectiveResult is record {| DepartmentObjective value; |}) {
+            return deptObjectiveResult.value;  // Return the matched department objective.
+        } else if (deptObjectiveResult is error) {
+            return deptObjectiveResult;  // Return the error if any occurred.
+        } else {
+            return error("Department Objective not found");  // If no department objective was found, return an error.
+        }
+    } else if (result is error) {
+        return result;  // Return the error if the find operation failed.
+    }
+}
+
+// Resolver for the 'getKPI' query. This function fetches a KPI by its ID.
+resource function get getKPI(string id) returns KPI|error {
+    // Creating a filter to match the KPI by its ID.
+    map<json> filter = {"id": id};
+
+    // Using the 'find' function of the mongoClient to fetch the KPI based on the provided ID.
+    var result = mongoClient->find("kpisCollection", "Assignment2Attempt", filter, (), (), -1, -1, KPI);
+
+    // Checking the type of the result. If it's a stream, it means documents were found matching the filter.
+    if (result is stream<KPI, error?>) {
+        var kpiResult = result.next();
+
+        // Checking if the result contains a KPI record.
+        if (kpiResult is record {| KPI value; |}) {
+            return kpiResult.value;  // Return the matched KPI.
+        } else if (kpiResult is error) {
+            return kpiResult;  // Return the error if any occurred.
+        } else {
+            return error("KPI not found");  // If no KPI was found, return an error.
+        }
+    } else if (result is error) {
+        return result;  // Return the error if the find operation failed.
+    }
+}
+
+//*****MUTATIONS FOR USERS---MUTATIONS FOR USERS---MUTATIONS FOR USERS---MUTATIONS FOR USERS---MUTATIONS FOR USERS******
+
+// Mutation to add a new user.
+resource function post addUser(User userInput) returns User|error {
+    // Convert User record to map<json> before insertion
+    map<json> userJson = {
+        "id": userInput.id,
+        "firstName": userInput.firstName,
+        "lastName": userInput.lastName,
+        "jobTitle": userInput.jobTitle,
+        "position": userInput.position,
+        "role": userInput.role,
+        "departmentID": userInput.departmentID
+    };
+
+    // Inserting the user into the "Users" collection.
+    var insertResult = mongoClient->insert(userJson, "usersCollection", "Assignment2Attempt");
+    
+    if (insertResult is ()) {  // If the insert operation was successful, return the inserted user.
+        return userInput;
+    } else {  // If there was an error during insertion, return the error.
+        return insertResult;
+    }
+}
+
+
+
+// Mutation to update a user by ID.
+resource function put updateUser(string id, User userInput) returns User|error {
+    // Convert User record to map<json> for the update statement
+    map<json> userUpdate = {
+        "$set": {
+            "firstName": userInput.firstName,
+            "lastName": userInput.lastName,
+            "jobTitle": userInput.jobTitle,
+            "position": userInput.position,
+            "role": userInput.role,
+            "departmentID": userInput.departmentID
+        }
+    };
+    
+    map<json> filter = {"id": id};
+
+    // Updating the user in the "Users" collection.
+    var updateResult = mongoClient->update(userUpdate, "usersCollection", "Assignment2Attempt", filter, false, false);
+    
+    if (updateResult is int && updateResult > 0) {  // If the update operation was successful, return the updated user.
+        return userInput;
+    } else {  // If there was an error during the update or no document was updated, return an error.
+        return error("Failed to update the user or no matching user found.");
+    }
+}
+
+
+// Mutation to delete a user by ID.
+resource function delete deleteUser(string id) returns string|error {
+    map<json> filter = {"id": id};
+
+    // Deleting the user from the "Users" collection.
+    var deleteResult = mongoClient->delete("usersCollection", "Assignment2Attempt", filter, false);
+    
+    if (deleteResult is int && deleteResult > 0) {  // If the delete operation was successful, return a success message.
+        return "User successfully deleted.";
+    } else {  // If there was an error during deletion or no document was deleted, return an error.
+        return error("Failed to delete the user or no matching user found.");
+    }
+}
+
+//END_OF_USERS--END_OF_USERS--END_OF_USERS--END_OF_USERS--END_OF_USERS--END_OF_USERS--END_OF_USERS--END_OF_USERS
+
+
+//MUTATIONS FOR KPIs---MUTATIONS FOR KPIs---MUTATIONS FOR KPIs---MUTATIONS FOR KPIs---MUTATIONS FOR KPIs
+
+// Mutation to add a new KPI.
+resource function post addKPI(KPI kpiInput) returns KPI|error {
+    // Convert KPI record to map<json> before insertion
+    map<json> kpiJson = {
+        "id": kpiInput.id,
+        "employeeID": kpiInput.employeeID,
+        "objectiveID": kpiInput.objectiveID,
+        "kpiName": kpiInput.kpiName,
+        "description": kpiInput.description,
+        "unit": kpiInput.unit,
+        "score": kpiInput.score,
+        "supervisorID": kpiInput.supervisorID
+    };
+
+    // Inserting the KPI into the "KPIs" collection.
+    var insertResult = mongoClient->insert(kpiJson, "kpisCollection", "Assignment2Attempt");
+    
+    if (insertResult is ()) {  // If the insert operation was successful, return the inserted KPI.
+        return kpiInput;
+    } else {  // If there was an error during insertion, return the error.
+        return insertResult;
+    }
+}
+
+// Mutation to update a KPI by ID.
+resource function put updateKPI(string id, KPI kpiInput) returns KPI|error {
+    // Convert KPI record to map<json> for the update statement
+    map<json> kpiUpdate = {
+        "$set": {
+            "employeeID": kpiInput.employeeID,
+            "objectiveID": kpiInput.objectiveID,
+            "kpiName": kpiInput.kpiName,
+            "description": kpiInput.description,
+            "unit": kpiInput.unit,
+            "score": kpiInput.score,
+            "supervisorID": kpiInput.supervisorID
+        }
+    };
+    
+    map<json> filter = {"id": id};
+
+    // Updating the KPI in the "KPIs" collection.
+    var updateResult = mongoClient->update(kpiUpdate, "kpisCollection", "Assignment2Attempt", filter, false, false);
+    
+    if (updateResult is int && updateResult > 0) {  // If the update operation was successful, return the updated KPI.
+        return kpiInput;
+    } else {  // If there was an error during the update or no document was updated, return an error.
+        return error("Failed to update the KPI or no matching KPI found.");
+    }
+}
+
+// Mutation to delete a KPI by ID.
+resource function delete deleteKPI(string id) returns string|error {
+    map<json> filter = {"id": id};
+
+    // Deleting the KPI from the "KPIs" collection.
+    var deleteResult = mongoClient->delete("kpisCollection", "Assignment2Attempt", filter, false);
+    
+    if (deleteResult is int && deleteResult > 0) {  // If the delete operation was successful, return a success message.
+        return "KPI successfully deleted.";
+    } else {  // If there was an error during deletion or no document was deleted, return an error.
+        return error("Failed to delete the KPI or no matching KPI found.");
+    }
+}
+
+//END_OF_KPIs--END_OF_KPIs--END_OF_KPIs--END_OF_KPIs--END_OF_KPIs--END_OF_KPIs--END_OF_KPIs--END_OF_KPIs
+
+//MUTATIONS FOR DepartmentObjectives---MUTATIONS FOR DepartmentObjectives---MUTATIONS FOR DepartmentObjectives---MUTATIONS FOR DepartmentObjectives---MUTATIONS FOR DepartmentObjectives
+
+// Mutation to add a new DepartmentObjective.
+resource function post addDepartmentObjective(DepartmentObjective deptObjInput) returns DepartmentObjective|error {
+    // Convert DepartmentObjective record to map<json> before insertion
+    map<json> deptObjJson = {
+        "id": deptObjInput.id,
+        "objectiveName": deptObjInput.objectiveName,
+        "description": deptObjInput.description,
+        "contributionPercentage": deptObjInput.contributionPercentage,
+        "departmentID": deptObjInput.departmentID
+    };
+
+    // Inserting the DepartmentObjective into the "DepartmentObjectives" collection.
+    var insertResult = mongoClient->insert(deptObjJson, "objectivesCollection", "Assignment2Attempt");
+    
+    if (insertResult is ()) {  // If the insert operation was successful, return the inserted DepartmentObjective.
+        return deptObjInput;
+    } else {  // If there was an error during insertion, return the error.
+        return insertResult;
+    }
+}
+
+// Mutation to update a DepartmentObjective by ID.
+resource function put updateDepartmentObjective(string id, DepartmentObjective deptObjInput) returns DepartmentObjective|error {
+    // Convert DepartmentObjective record to map<json> for the update statement
+    map<json> deptObjUpdate = {
+        "$set": {
+            "objectiveName": deptObjInput.objectiveName,
+            "description": deptObjInput.description,
+            "contributionPercentage": deptObjInput.contributionPercentage,
+            "departmentID": deptObjInput.departmentID
+        }
+    };
+    
+    map<json> filter = {"id": id};
+
+    // Updating the DepartmentObjective in the "DepartmentObjectives" collection.
+    var updateResult = mongoClient->update(deptObjUpdate, "objectivesCollection", "Assignment2Attempt", filter, false, false);
+    
+    if (updateResult is int && updateResult > 0) {  // If the update operation was successful, return the updated DepartmentObjective.
+        return deptObjInput;
+    } else {  // If there was an error during the update or no document was updated, return an error.
+        return error("Failed to update the DepartmentObjective or no matching DepartmentObjective found.");
+    }
+}
+
+// Mutation to delete a DepartmentObjective by ID.
+resource function delete deleteDepartmentObjective(string id) returns string|error {
+    map<json> filter = {"id": id};
+
+    // Deleting the DepartmentObjective from the "DepartmentObjectives" collection.
+    var deleteResult = mongoClient->delete("objectivesCollection", "Assignment2Attempt", filter, false);
+    
+    if (deleteResult is int && deleteResult > 0) {  // If the delete operation was successful, return a success message.
+        return "DepartmentObjective successfully deleted.";
+    } else {  // If there was an error during deletion or no document was deleted, return an error.
+        return error("Failed to delete the DepartmentObjective or no matching DepartmentObjective found.");
+    }
+}
+
+//END_OF_DepartmentObjectives--END_OF_DepartmentObjectives--END_OF_DepartmentObjectives--END_OF_DepartmentObjectives--END_OF_DepartmentObjectives--END_OF_DepartmentObjectives--END_OF_DepartmentObjectives--END_OF_DepartmentObjectives
+
+
+}

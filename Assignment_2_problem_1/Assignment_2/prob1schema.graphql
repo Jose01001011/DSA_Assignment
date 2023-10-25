@@ -1,0 +1,61 @@
+# Types represent the structure of data objects in the system.
+
+# User type represents an individual user in the system.
+type User {
+    id: ID!                    # Unique identifier for each user.
+    firstName: String!         # First name of the user.
+    lastName: String!          # Last name of the user.
+    jobTitle: String!          # The professional title of the user, e.g., Lecturer, Professor.
+    position: String!          # The hierarchical position of the user, e.g., Senior, Junior, Head.
+    role: String!              # The role the user plays in the system, e.g., Employee, HoD, Supervisor.
+    departmentID: Int!         # The ID of the department to which the user belongs.
+}
+
+# DepartmentObjective type represents the objectives set by different departments.
+type DepartmentObjective {
+    id: ID!                    # Unique identifier for each department objective.
+    objectiveName: String!     # The name of the departmental objective.
+    description: String!       # A detailed description of the objective.
+    contributionPercentage: Int!  # The percentage contribution of the objective to the overall departmental goals.
+    departmentID: Int!         # The ID of the department to which the objective belongs.
+}
+
+# KPI type represents the Key Performance Indicators associated with employees.
+type KPI {
+    id: ID!                    # Unique identifier for each KPI.
+    employeeID: Int!           # The ID of the employee associated with the KPI.
+    objectiveID: Int!          # The ID of the objective to which the KPI is related.
+    kpiName: String!           # The name of the Key Performance Indicator.
+    description: String!       # A detailed description of the KPI.
+    unit: String!              # The unit of measurement for the KPI, e.g., Percentage.
+    score: Float!              # The employee's score for the given KPI.
+    supervisorID: Int!         # The ID of the supervisor responsible for evaluating the KPI.
+}
+
+# Queries allow fetching data from the system.
+type Query {
+    getUser(id: ID!): User                        # Fetch a specific user by ID.
+    getAllUsers: [User]                           # Fetch all users.
+    getDepartmentObjective(id: ID!): DepartmentObjective  # Fetch a specific department objective by ID.
+    getAllDepartmentObjectives: [DepartmentObjective]     # Fetch all department objectives.
+    getKPI(id: ID!): KPI                          # Fetch a specific KPI by ID.
+    getAllKPIs: [KPI]                             # Fetch all KPIs.
+}
+
+# Mutations allow for creating, updating, and deleting data in the system.
+type Mutation {
+    # CRUD operations for User.
+    createUser(firstName: String!, lastName: String!, jobTitle: String!, position: String!, role: String!, departmentID: Int!): User  # Create a new user.
+    updateUser(id: ID!, firstName: String, lastName: String, jobTitle: String, position: String, role: String, departmentID: Int): User  # Update an existing user.
+    deleteUser(id: ID!): Boolean                 # Delete a user by ID.
+    
+    # CRUD operations for DepartmentObjective.
+    createDepartmentObjective(objectiveName: String!, description: String!, contributionPercentage: Int!, departmentID: Int!): DepartmentObjective  # Create a new department objective.
+    updateDepartmentObjective(id: ID!, objectiveName: String, description: String, contributionPercentage: Int, departmentID: Int): DepartmentObjective  # Update an existing department objective.
+    deleteDepartmentObjective(id: ID!): Boolean  # Delete a department objective by ID.
+    
+    # CRUD operations for KPI.
+    createKPI(employeeID: Int!, objectiveID: Int!, kpiName: String!, description: String!, unit: String!, score: Float!, supervisorID: Int!): KPI  # Create a new KPI.
+    updateKPI(id: ID!, employeeID: Int, objectiveID: Int, kpiName: String, description: String, unit: String, score: Float, supervisorID: Int): KPI  # Update an existing KPI.
+    deleteKPI(id: ID!): Boolean                  # Delete a KPI by ID.
+}
